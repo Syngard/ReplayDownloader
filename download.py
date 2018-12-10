@@ -1,6 +1,14 @@
 import urllib3, certifi
 import json
 
+from urllib.error import URLError
+from urllib.parse import parse_qsl
+from urllib.parse import quote
+from urllib.parse import unquote
+from urllib.parse import urlencode
+from urllib.request import urlopen
+from urllib import request
+
 from menu import menu_choices 
 
 class Downloader:
@@ -32,6 +40,7 @@ class Downloader:
         # Download video and write to file
     
     # Decode some URL-encoded characters in a URL
+    # To be replaced by a lib function (in urllib most likely)
     def url_decode(self, url):
         n_url = ""
         i = 0
