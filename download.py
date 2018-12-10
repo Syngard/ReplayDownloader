@@ -24,17 +24,17 @@ class Downloader:
         parsed    = json.loads(json_file.data)
         files     = parsed['videoJsonPlayer']['VSR']
         
+        # Menu to choose language and resolution
         self.menu_choices(files)
 
     
-    # URL found is URL-encoded
+    # Decode some URL-encoded characters in a URL
     def url_decode(self, url):
         n_url = ""
         i = 0
         while (i < len(url)):
             if (url[i] == '%'):
-                a = url[i+1:i+3]
-                n_url += chr(int('0x'+a, 16))
+                n_url += chr(int('0x'+url[i+1:i+3], 16))
                 i += 3
             else:
                 n_url += url[i]
@@ -42,6 +42,7 @@ class Downloader:
         
         return n_url
 
+    # Prints a menu and gets user choice for language/quality
     def menu_choices(self, files):
         versions, resolutions = [], []
         for i in files:
@@ -50,7 +51,7 @@ class Downloader:
                 versions.append(ver)
                 print(">>>", ver)
 
-        chosen_version = input(">>> Choice :")
+        chosen_version = input(">>> Choice : ")
 
         for i in files:
             res = (str(files[i]['width']),str(files[i]['height']))
@@ -59,13 +60,19 @@ class Downloader:
                 resolutions.append(res)
                 print(">>>", res[0]+"x"+res[1])
 
-             
+        choosen_res = input(">>> Choice : ").split('x')
+        choosen_res = (int(choosen_res[0]), int(choosen_res[1]))
 
-            #print(parsed['videoJsonPlayer']['VSR'][i]['width'], 'x',
-            #      parsed['videoJsonPlayer']['VSR'][i]['height'], ';',
-            #      parsed['videoJsonPlayer']['VSR'][i]['versionLibelle'],'\n')
+        # Finding the identifier for the right version 
+        for i in files:
+            if (files[i]['versionLibelle'] == chosen_version and
+                (files[i]['width'],files[i]['height']) == choosen_res and
+                files[i]['mediaType'] == "mp4"):
+                video_id = i
+                video_url = files[i]['url']
+                break
 
+        print(video_id,":",video_url)
 
 d = Downloader('https://www.arte.tv/fr/videos/052720-000-A/margin-call/')
-
 d.start()
