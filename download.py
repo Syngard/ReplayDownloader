@@ -10,28 +10,32 @@ from urllib.request import urlopen
 from urllib import request
 
 from menu import menu_choices 
+from request import get
+
 
 class Downloader:
     def __init__(self, url):
         self.url   = url
 
     def start(self):
-        http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
+        #http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
         
         # Get page from replay website
-        resp = http.request('GET', self.url)
+        #resp = http.request('GET', self.url)
+        resp = get(self.url)
 
         # find API URL for the movie
-        json_url = resp.data[resp.data.find(b'json_url')+9:]
-        json_url = json_url[:json_url.find(b'"')]
-        json_url = str(json_url)[2:-1]
+        json_url = resp[resp.find('json_url')+9:]
+        json_url = json_url[:json_url.find('"')]
+        #json_url = str(json_url)[2:-1]
         json_url = self.url_decode(json_url)
         
+        print(json_url)
         # Get the json response from API
-        json_file = http.request('GET', json_url)
+        json_file = get(json_url)
         
         # Parse JSON response to use properly
-        parsed    = json.loads(json_file.data)
+        parsed    = json.loads(json_file)
         files     = parsed['videoJsonPlayer']['VSR']
         
         # Menu to choose language and resolution
