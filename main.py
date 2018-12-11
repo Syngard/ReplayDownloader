@@ -11,7 +11,7 @@ from urllib import request
 
 from menu import menu_choices 
 from request import get
-from download import download
+import download
 
 class Arte:
     # Interface to download movies from the Arte website
