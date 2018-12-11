@@ -37,3 +37,7 @@ def stream_response(response, chunk_size=8 * 1024):
         if not buf:
             break
         yield buf
+
+def file_size(url):
+    response = urlopen(url)
+    return int(response.getheader("Content-Length"))

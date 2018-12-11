@@ -1,66 +1,88 @@
-import urllib3, certifi
-import json
-
-from urllib.error import URLError
-from urllib.parse import parse_qsl
-from urllib.parse import quote
-from urllib.parse import unquote
-from urllib.parse import urlencode
-from urllib.request import urlopen
-from urllib import request
-
-from menu import menu_choices 
-from request import get
+import os, request
 
 
-class Downloader:
-    def __init__(self, url):
-        self.url   = url
+# TODO : Class Downloader
 
-    def start(self):
-        #http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
-        
-        # Get page from replay website
-        #resp = http.request('GET', self.url)
-        resp = get(self.url)
+def default_filename():
+    """ TODO : Generate filename based on the video title.
+    For now just a fixed string
+    :rtype: str
+    :returns:
+        An os file system compatible filename.
+    """
+    return 'default.mp4'
 
-        # find API URL for the movie
-        json_url = resp[resp.find('json_url')+9:]
-        json_url = json_url[:json_url.find('"')]
-        #json_url = str(json_url)[2:-1]
-        json_url = self.url_decode(json_url)
-        
-        print(json_url)
-        # Get the json response from API
-        json_file = get(json_url)
-        
-        # Parse JSON response to use properly
-        parsed    = json.loads(json_file)
-        files     = parsed['videoJsonPlayer']['VSR']
-        
-        # Menu to choose language and resolution
-        video_url = menu_choices(files)
-        
-        # Download video and write to file
+def download(url, output_path=None, filename=None, filename_prefix=None):
+    """Write the media stream to disk.
+    :param output_path:
+        (optional) Output path for writing media file. If one is not
+        specified, defaults to the current working directory.
+    :type output_path: str or None
+    :param filename:
+        (optional) Output filename (stem only) for writing media file.
+        If one is not specified, the default filename is used.
+    :type filename: str or None
+    :param filename_prefix:
+        (optional) A string that will be prepended to the filename.
+        For example a number in a playlist or the name of a series.
+        If one is not specified, nothing will be prepended
+        This is seperate from filename so you can use the default
+        filename but still add a prefix.
+    :type filename_prefix: str or None
+    :rtype: str
+    """
+    output_path = output_path or os.getcwd()
     
-    # Decode some URL-encoded characters in a URL
-    # To be replaced by a lib function (in urllib most likely)
-    def url_decode(self, url):
-        n_url = ""
-        i = 0
-        while (i < len(url)):
-            if (url[i] == '%'):
-                n_url += chr(int('0x'+url[i+1:i+3], 16))
-                i += 3
-            else:
-                n_url += url[i]
-                i += 1
-        
-        return n_url
+    """
+    if filename:
+        safe = safe_filename(filename)
+        filename = '{filename}.{s.subtype}'.format(filename=safe, s=self)
+    """
+    filename = default_filename()
+
+    if filename_prefix:
+        filename = '{prefix}{filename}'\
+            .format(
+                prefix=safe_filename(filename_prefix),
+                filename=filename,
+            )
+
+    # file path
+    fp = os.path.join(output_path, filename)
+    bytes_remaining = request.file_size(url) #self.filesize
+    
+    with open(fp, 'wb') as fh:
+        for chunk in request.get(url, streaming=True):
+            # reduce the (bytes) remainder by the length of the chunk.
+            bytes_remaining -= len(chunk)
+            # send to the on_progress callback.
+            on_progress(chunk, fh, bytes_remaining)
+    #on_complete(fh)
+    return fp
 
 
+def on_progress(chunk, file_handler, bytes_remaining):
+    """On progress callback function.
+    This function writes the binary data to the file, then checks if an
+    additional callback is defined in the monostate. This is exposed to
+    allow things like displaying a progress bar.
+    :param str chunk:
+        Segment of media file binary data, not yet written to disk.
+    :param file_handler:
+        The file handle where the media is being written to.
+    :type file_handler:
+        :py:class:`io.BufferedWriter`
+    :param int bytes_remaining:
+        The delta between the total file size in bytes and amount already
+        downloaded.
+    :rtype: None
+    """
+    file_handler.write(chunk)
+    
+    """
+    on_progress = self._monostate['on_progress']
+    if on_progress:
+        logger.debug('calling on_progress callback %s', on_progress)
+        on_progress(self, chunk, file_handler, bytes_remaining)
+    """
 
-
-
-d = Downloader('https://www.arte.tv/fr/videos/052720-000-A/margin-call/')
-d.start()
