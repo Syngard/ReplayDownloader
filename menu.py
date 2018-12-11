@@ -1,32 +1,43 @@
 # Prints a menu and gets user choice for language/quality
 def menu_choices(files):
-    versions, resolutions = [], []
+    versions      = []
+    versions_dict = {}
+    c             = 0
     for i in files:
         ver = files[i]['versionLibelle']
         if ver not in versions:
             versions.append(ver)
-            print(">>>", ver)
+            versions_dict[c] = ver
+            print(">>>", c, ':', ver)
+            c+=1
 
-    chosen_version = input(">>> Choice : ")
+    chosen_version = versions_dict[int(input(">>> Choice : "))]
 
+    resolutions      = []
+    resolutions_dict = {}
+    c                = 0
     for i in files:
-        res = (str(files[i]['width']),str(files[i]['height']))
+        res = (files[i]['width'],files[i]['height'])
         if (files[i]['versionLibelle'] == chosen_version
                         and res not in resolutions):
             resolutions.append(res)
-            print(">>>", res[0]+"x"+res[1])
+            resolutions_dict[c] = res
+            print(">>>", c, ':', str(res[0])+"x"+str(res[1]))
+            c += 1
 
-    choosen_res = input(">>> Choice : ").split('x')
-    choosen_res = (int(choosen_res[0]), int(choosen_res[1]))
+    chosen_res = resolutions_dict[int(input(">>> Choice : "))]
+    
+    print(chosen_version)
+    print(chosen_res)
 
     # Finding the identifier for the right version 
     for i in files:
+        print(files[i]['width'],files[i]['height'])
         if (files[i]['versionLibelle'] == chosen_version and
-            (files[i]['width'],files[i]['height']) == choosen_res and
+            (files[i]['width'],files[i]['height']) == chosen_res and
             files[i]['mediaType'] == "mp4"):
-            video_id = i
-            video_url = files[i]['url']
-            break
+            
+            print(files[i]['url'])
+            return files[i]['url']
 
-    print(video_id,":",video_url)
-    return video_url
+
