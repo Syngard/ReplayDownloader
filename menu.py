@@ -55,3 +55,34 @@ def menu_choices(files, default_ver = None, default_res = None):
             return files[i]['url']
 
 
+"""
+def progress_bar(self, title, progress, text_after='', length=30):
+    # Update information about the progress bar
+    self.show_progress_bar = True
+    self.progress_bar_title = title
+    self.progress_bar_progress = progress
+    self.progress_bar_text_after = text_after
+    self.progress_bar_length = length
+
+    # Calculate the number of # characters to show
+    nb_block = int(round(progress*length/100))
+    msg = '{0}: [{1}{2}] {3}% {4}\r'.format(
+        title,
+        '#'*nb_block,
+        '-'*(length - nb_block),
+        progress,
+        text_after,
+        )
+
+    # write the progress bar
+    sys.stdout.write(msg)
+    sys.stdout.flush()
+
+  '''
+    display a full width progress bar
+
+    progress must be contain between 0 and 100
+    
+    output format: [title] [#######---------] [text_after]
+  '''
+"""

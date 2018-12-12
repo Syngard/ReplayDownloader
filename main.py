@@ -11,7 +11,7 @@ from urllib import request
 
 from menu import menu_choices 
 from request import get
-from download import download
+from download import Downloader
 
 class Arte:
     """Interface to download movies from the Arte website"""
@@ -38,8 +38,8 @@ class Arte:
         video_url = menu_choices(files['VSR'])
         
         # Download video and write to file
-        download(
-            video_url, 
+        Downloader().download(
+            url = video_url, 
             filename='{filename}.mp4'.format(filename=self.get_title(files))
         )
 
