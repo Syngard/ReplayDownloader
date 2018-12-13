@@ -1,5 +1,6 @@
 import os, request
 
+from menu import progress_bar
 
 # TODO : Class Downloader
 
@@ -54,14 +55,17 @@ class Downloader():
 
         # file path
         fp = os.path.join(output_path, filename)
-        bytes_remaining = request.file_size(url) #self.filesize
-        
+        total_size = request.file_size(url) #self.filesize
+        bytes_remaining = total_size
         with open(fp, 'wb') as fh:
             for chunk in request.get(url, streaming=True):
                 # reduce the (bytes) remainder by the length of the chunk.
                 bytes_remaining -= len(chunk)
                 # send to the on_progress callback.
-                self.on_progress(chunk, fh, bytes_remaining)
+                self.on_progress(chunk, fh, bytes_remaining/total_size)
+                
+                progress = ((total_size - bytes_remaining)/total_size)*100
+                progress_bar(filename,progress)
         #on_complete(fh)
         return fp
 
